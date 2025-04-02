@@ -123,7 +123,28 @@ class CodeGenerationProblem:
 
 def load_code_generation_dataset(release_version="release_v1", start_date=None, end_date=None) -> list[CodeGenerationProblem]:
     dataset = load_dataset("livecodebench/code_generation_lite", split="test", version_tag=release_version, trust_remote_code=True)
-    dataset = [CodeGenerationProblem(**p) for p in dataset]  # type: ignore
+    print(f'Loaded dataset')
+    from tqdm.auto import tqdm
+
+    questions = ['1873_A',
+        '1873_B',
+        '1873_D',
+        '1883_B',
+        '1883_C',
+        '1899_A',
+        '1899_B',
+        '1899_C',
+        '1899_D',
+        '2756',
+        '2756',
+        '2777',
+        '2785',
+        '2791',
+        '2800',
+        'abc302_b'
+    ]
+
+    dataset = [CodeGenerationProblem(**p) for p in tqdm(dataset) if p['question_id'] in questions]  # type: ignore
     if start_date is not None:
         p_start_date = datetime.strptime(start_date, "%Y-%m-%d")
         dataset = [e for e in dataset if p_start_date <= e.contest_date]

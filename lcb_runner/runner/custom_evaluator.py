@@ -16,9 +16,18 @@ def main():
     args = get_args()
 
     benchmark, _ = build_prompt_benchmark(args)
+    print(f"Loaded {len(benchmark)} instances")
+
 
     with open(args.custom_output_file, "r") as f:
         custom_outputs = json.load(f)
+        benchmark_questions = set(i.question_id for i in benchmark)
+        # keep only samples with ids from [i.question_id for i in benchmark]
+        custom_outputs = [custom_output for custom_output in custom_outputs if custom_output["question_id"] in benchmark_questions]
+        print(sorted([custom_output["question_id"] for custom_output in custom_outputs]))
+        print(sorted(list(benchmark_questions)))
+
+
         assert isinstance(custom_outputs, list)
         assert len(custom_outputs) == len(benchmark), f"{len(custom_outputs)} != {len(benchmark)}"
         if isinstance(custom_outputs[0], list):
@@ -99,6 +108,7 @@ def main():
         output_path = args.custom_output_file[:-5] + f"_{args.scenario.value}_output.json"
     else:
         output_path = get_output_path(args.custom_output_save_name, args)
+    print(f'Saving results to {output_path}')
 
     with open(output_path, "w") as f:
         json.dump(save_results, f, indent=4)
@@ -107,6 +117,7 @@ def main():
     with open(output_path.replace(".json", "_eval.json"), "w") as f:
         json.dump(metrics, f, indent=4)
 
+    print(f'Saving additional results to {output_path.replace(".json", "_eval_all.json")}')
     with open(output_path.replace(".json", "_eval_all.json"), "w") as f:
         json.dump(save_eval_results, f, indent=4)
 
